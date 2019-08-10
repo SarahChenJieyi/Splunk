@@ -1,0 +1,53 @@
+<form>
+  <label>Weekly TOP10 Report</label>
+  <fieldset submitButton="false">
+    <input type="time" token="tok_time">
+      <label>Time</label>
+      <default>
+        <earliest>-7d@w0</earliest>
+        <latest>@w0</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>| tstats 
+    values(TestStepResult.param3) as param3
+    dc(TestStepResult.shortVIN) as errorCount
+    values(TestStepResult.shortVIN) as shortVINs 
+    from datamodel=APDM_TestStepResults
+    where
+    (TestStepResult.werk="tiexi")
+    (TestStepResult.systemName="CASCADE")
+    (TestStepResult.errorCount&gt;0)
+    (TestStepResult.TestStepResult="NOK")
+    (TestStepResult.inline=true)
+    (TestStepResult.pruefumfangName=A_CAS_INIT OR TestStepResult.pruefumfangName=A_DATA OR TestStepResult.pruefumfangName=A_DIAGNOSE OR TestStepResult.pruefumfangName=B_DATA OR TestStepResult.pruefumfangName=B_DIAGNOSE OR TestStepResult.pruefumfangName=ECOS OR TestStepResult.pruefumfangName=EKS_INIT OR TestStepResult.pruefumfangName=EWS_SYNC OR TestStepResult.pruefumfangName=F1_DIAGNOSE OR TestStepResult.pruefumfangName=F1_INIT OR TestStepResult.pruefumfangName=F2_DIAGNOSE OR TestStepResult.pruefumfangName=FAS OR TestStepResult.pruefumfangName=FDP_DIAGNOSE OR TestStepResult.pruefumfangName=FDP_VOR_FAHRT OR TestStepResult.pruefumfangName=FINISH OR TestStepResult.pruefumfangName=FUNKTIONAL_NORMALMODE OR TestStepResult.pruefumfangName=GEAR_TEST OR TestStepResult.pruefumfangName=INFOTAINMENT OR TestStepResult.pruefumfangName=INIT_ICOM OR TestStepResult.pruefumfangName=KEY_INIT OR TestStepResult.pruefumfangName=MOTEST OR TestStepResult.pruefumfangName=RESET OR TestStepResult.pruefumfangName=SPURDIAG OR TestStepResult.pruefumfangName=TUER_HL OR TestStepResult.pruefumfangName=TUER_HR OR TestStepResult.pruefumfangName=TUER_VL OR TestStepResult.pruefumfangName=TUER_VR OR TestStepResult.pruefumfangName=WA_EKS)
+    (TestStepResult.description=*)
+    (TestStepResult.param1=*)
+    (TestStepResult.series="F30" OR TestStepResult.series="F35" OR TestStepResult.series="F45" OR TestStepResult.series="F49" OR TestStepResult.series="F52")
+    groupby TestStepResult.series TestStepResult.pruefumfangName TestStepResult.param1 TestStepResult.errorText TestStepResult.description TestStepResult.param2 TestStepResult.resultName TestStepResult.resultID TestStepResult.resultValueStr TestStepResult.adviseText TestStepResult.prueflingName TestStepResult.pruefprozedurName
+| rename TestStepResult."*" as * 
+| sort -errorCount
+| rename param1 as SGBD 
+| rename param2 as API-jop
+| rename param3 as Parameter</query>
+          <earliest>$tok_time.earliest$</earliest>
+          <latest>$tok_time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <drilldown>
+          <link target="_blank">/app/iqp/5?form.tok_series=$row.series$&amp;form.tok_pu=$row.pruefumfangName$</link>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+</form>
